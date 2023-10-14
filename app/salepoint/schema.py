@@ -15,7 +15,7 @@ class SalePointCreate(BaseModel):
     address: str
     status: str
     openHours: List[OpenHours]
-    rko: str
+    rko: str | None
     openHoursIndividual: List[OpenHours]
     officeType: str
     salePointFormat: str

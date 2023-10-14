@@ -30,6 +30,11 @@ async_session_maker = sessionmaker(
 )
 
 
+class AtmDoesntExist(Exception):
+    pass
+
+
+# todo перенести в докер
 async def load_data_from_json_file(json_file_path, db: AsyncSession = Depends(get_db)):
     with open(json_file_path, 'r', encoding='utf-8') as file:
         data = json.load(file).get('atms')
@@ -67,12 +72,17 @@ if __name__ == "__main__":
 
 
 async def get_atm(id, db: AsyncSession = Depends(get_db)) -> AtmShow:
-    return await store.atm.get(db, id)
+    atm = await store.atm.get(db, id)
+    if not atm:
+        raise AtmDoesntExist
+    return atm
 
 
 async def get_multi_atm(skip, limit, db: AsyncSession = Depends(get_db)) -> List[AtmShow]:
-    res = await store.atm.get_multi(skip=skip, limit=limit, db=db)
-    return res.all()
+    atms = await store.atm.get_multi(skip=skip, limit=limit, db=db)
+    if not atms:
+        raise AtmDoesntExist
+    return atms.all()
 
 
 async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -> list[AtmShow]:
@@ -96,9 +106,9 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
     if filters.supportsUsd:
         conditions.append(ATM.supportsUsd == True)
     if conditions:
-        offices = await store.atm.get_by_filters(db=db, conditions=conditions, offset=filters.offset,
-                                                 limit=filters.limit)
+        atms = await store.atm.get_by_filters(db=db, conditions=conditions, offset=filters.offset,
+                                              limit=filters.limit)
     else:
-        offices = await store.atm.get_multi(skip=filters.offset, limit=filters.limit)
-        offices = offices.all()
-    return offices
+        atms = await store.atm.get_multi(skip=filters.offset, limit=filters.limit)
+        atms = atms.all()
+    return atms

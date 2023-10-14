@@ -18,17 +18,17 @@ router = APIRouter()
 
 
 @router.get('/')
-async def get_sale_point(id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> SalepointShow:
+async def get_sale_point(id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> SalepointShow | None:
     return await service.get_sale_point(id, db)
 
 
 @router.get('/multi')
-async def get_sale_point_multi(skip: int, limit: int, db: AsyncSession = Depends(get_db)):
+async def get_sale_point_multi(skip: int, limit: int, db: AsyncSession = Depends(get_db)) -> List[SalepointShow]:
     return await service.get_multi_sale_point(skip=skip, limit=limit, db=db)
 
 
 @router.post("/filters")
-async def get_sale_point_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -> list[SalepointShow]:
+async def get_sale_point_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -> List[SalepointShow]:
     return await service.get_by_filters(filters, db)
 
 

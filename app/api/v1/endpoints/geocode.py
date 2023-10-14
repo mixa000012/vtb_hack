@@ -33,3 +33,4 @@ async def suggest_address(query: str) -> list[str] | None:
     return results
 
 
+#todo пеший ход добавить

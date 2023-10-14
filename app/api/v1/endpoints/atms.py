@@ -12,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.core.deps import get_db
 from app.atms import service
+from app.atms.service import AtmDoesntExist
 from app.atms.schema import AtmShow, Filters
 
 router = APIRouter()
@@ -19,14 +20,23 @@ router = APIRouter()
 
 @router.get('/')
 async def get_atm(id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> AtmShow:
-    return await service.get_atm(id, db)
+    try:
+        return await service.get_atm(id, db)
+    except AtmDoesntExist:
+        raise HTTPException(status_code=404, detail="Attends not found")
 
 
 @router.get('/multi')
 async def get_atm_multi(skip: int, limit: int, db: AsyncSession = Depends(get_db)):
-    return await service.get_multi_atm(skip=skip, limit=limit, db=db)
+    try:
+        return await service.get_multi_atm(skip=skip, limit=limit, db=db)
+    except AtmDoesntExist:
+        raise HTTPException(status_code=404, detail="Attends not found")
 
 
 @router.post("/filters")
 async def get_atm_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -> list[AtmShow]:
-    return await service.get_by_filters(filters, db)
+    try:
+        return await service.get_by_filters(filters, db)
+    except AtmDoesntExist:
+        raise HTTPException(status_code=404, detail="Attends not found")
