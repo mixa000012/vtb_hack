@@ -35,7 +35,7 @@ class SalePointCreate(BaseModel):
 
 
 class SalepointShow(SalePointCreate):
-    distance_for_you: int
+    distance_to_you: int
 
     class Config:
         orm_mode = True

@@ -89,10 +89,3 @@ async def revoke_admin_privilege(
 async def get_user(db: AsyncSession = Depends(get_db),
                    current_user: User = Depends(get_current_user_from_token)):
     return await service.get_user(db, current_user)
-
-
-@router.get('/ping')
-async def ping(db: AsyncSession = Depends(get_db),
-               current_user: User = Depends(get_current_user_from_token)):
-    user = current_user.admin_role
-    return user
