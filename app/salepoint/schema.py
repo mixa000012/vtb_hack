@@ -33,8 +33,9 @@ class SalePointCreate(BaseModel):
     issuing: bool
 
 
-
 class SalepointShow(SalePointCreate):
+    id: uuid.UUID
+
     class Config:
         orm_mode = True
 
