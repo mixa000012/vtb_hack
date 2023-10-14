@@ -6,6 +6,8 @@ from pydantic.main import BaseModel
 
 
 class ATMCreateSchema(BaseModel):
+    id: uuid.UUID
+
     address: str
     latitude: float
     longitude: float
@@ -21,13 +23,12 @@ class ATMCreateSchema(BaseModel):
 
 
 class AtmShow(ATMCreateSchema):
-    id: uuid.UUID
-
     class Config:
         orm_mode = True
 
 
 class AtmShowWithDistance(AtmShow):
+    distance_to_you: int
     pass
 
 

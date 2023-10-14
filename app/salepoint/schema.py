@@ -11,6 +11,7 @@ class OpenHours(BaseModel):
 
 
 class SalePointCreate(BaseModel):
+    id: uuid.UUID
     salePointName: str
     address: str
     status: str
@@ -34,13 +35,15 @@ class SalePointCreate(BaseModel):
 
 
 class SalepointShow(SalePointCreate):
-    id: uuid.UUID
+    distance_for_you: int
 
     class Config:
         orm_mode = True
 
+
 class SalepointShowWithDistance(SalepointShow):
     pass
+
 
 class Filters(BaseModel):
     offset: int

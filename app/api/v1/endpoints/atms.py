@@ -43,6 +43,6 @@ async def get_atm_by_filters(filters: Filters, db: AsyncSession = Depends(get_db
 
 
 @router.post('/distance')
-async def find_closest_offices(coords: List[float]) -> List[AtmShowWithDistance]:
+async def find_closest_atms(coords: List[float]) -> List[AtmShowWithDistance]:
     results = await service.calculate_distance_and_order(coords)
     return results
