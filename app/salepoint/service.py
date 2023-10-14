@@ -31,7 +31,7 @@ async_session_maker = sessionmaker(
 
 
 # todo для бановатов find closest
-class OfficeDoesntExist:
+class OfficeDoesntExist(Exception):
     pass
 
 
@@ -52,7 +52,6 @@ LIMIT 15;
     """)
     async with async_session_maker() as session:
         result = await session.execute(sql_query)
-
     return result.mappings().all()
 
 
@@ -65,10 +64,10 @@ if __name__ == "__main__":
 
 
 async def get_sale_point(id, db: AsyncSession = Depends(get_db)) -> SalepointShow:
-    sale_points = await store.sale_point.get(db, id)
-    if not sale_points:
+    sale_point = await store.sale_point.get(db, id)
+    if not sale_point:
         raise OfficeDoesntExist
-    return sale_points.all()
+    return sale_point
 
 
 async def get_multi_sale_point(skip, limit, db: AsyncSession = Depends(get_db)) -> List[SalepointShow]:

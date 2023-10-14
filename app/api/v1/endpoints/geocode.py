@@ -22,8 +22,8 @@ router = APIRouter()
 async def get_route(coords: List[List[float]]):
     try:
         await get_route_from_coords(coords)
-    except ApiError:
-        raise HTTPException(404, detail='Api error')
+    except ApiError as ex :
+        raise HTTPException(404, detail=f'{ex}')
     return
 
 

@@ -11,7 +11,7 @@ coords = ((37.704547, 55.802432), (37.675002, 55.773763))
 
 
 async def get_route_from_coords(coords: List[List[float]]):
-    geometry = client.directions(coords)['routes'][0]['geometry']
+    geometry = directions(client, coords)['routes'][0]['geometry']
     decoded = convert.decode_polyline(geometry)
     return decoded
 
