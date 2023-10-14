@@ -21,8 +21,14 @@ class ATMCreateSchema(BaseModel):
 
 
 class AtmShow(ATMCreateSchema):
+    id: uuid.UUID
+
     class Config:
         orm_mode = True
+
+
+class AtmShowWithDistance(AtmShow):
+    pass
 
 
 class Filters(BaseModel):

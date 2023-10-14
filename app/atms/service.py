@@ -1,5 +1,6 @@
 import asyncio
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from app.core.deps import get_db
@@ -112,3 +113,21 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
         atms = await store.atm.get_multi(skip=filters.offset, limit=filters.limit)
         atms = atms.all()
     return atms
+
+
+async def calculate_distance_and_order(coords):
+    sql_query = text(f"""
+        SELECT
+    *,
+    point{tuple(coords)} <@> point(longitude, latitude) AS distance_to_you
+FROM
+    atms
+ORDER BY
+    distance_to_you
+LIMIT 15;
+
+    """)
+    async with async_session_maker() as session:
+        result = await session.execute(sql_query)
+
+    return result.mappings().all()

@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from app.core.deps import get_db
 from app.atms import service
 from app.atms.service import AtmDoesntExist
-from app.atms.schema import AtmShow, Filters
+from app.atms.schema import AtmShow, Filters, AtmShowWithDistance
 
 router = APIRouter()
 
@@ -40,3 +40,9 @@ async def get_atm_by_filters(filters: Filters, db: AsyncSession = Depends(get_db
         return await service.get_by_filters(filters, db)
     except AtmDoesntExist:
         raise HTTPException(status_code=404, detail="Attends not found")
+
+
+@router.post('/distance')
+async def find_closest_offices(coords: List[float]) -> List[AtmShowWithDistance]:
+    results = await service.calculate_distance_and_order(coords)
+    return results

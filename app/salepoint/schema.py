@@ -39,6 +39,8 @@ class SalepointShow(SalePointCreate):
     class Config:
         orm_mode = True
 
+class SalepointShowWithDistance(SalepointShow):
+    pass
 
 class Filters(BaseModel):
     offset: int

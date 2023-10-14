@@ -29,6 +29,12 @@ async_session_maker = sessionmaker(
     autocommit=False, autoflush=False, bind=engine_test, class_=AsyncSession, expire_on_commit=False,
 )
 
+
+# todo для бановатов find closest
+class OfficeDoesntExist:
+    pass
+
+
 from sqlalchemy import text
 
 
@@ -59,11 +65,16 @@ if __name__ == "__main__":
 
 
 async def get_sale_point(id, db: AsyncSession = Depends(get_db)) -> SalepointShow:
-    return await store.sale_point.get(db, id)
+    sale_points = await store.sale_point.get(db, id)
+    if not sale_points:
+        raise OfficeDoesntExist
+    return sale_points.all()
 
 
 async def get_multi_sale_point(skip, limit, db: AsyncSession = Depends(get_db)) -> List[SalepointShow]:
     res = await store.sale_point.get_multi(skip=skip, limit=limit, db=db)
+    if not res:
+        raise OfficeDoesntExist
     return res.all()
 
 
@@ -79,4 +90,6 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
     else:
         offices = await store.sale_point.get_multi(skip=filters.offset, limit=filters.limit)
         offices = offices.all()
+    if not offices:
+        raise OfficeDoesntExist
     return offices
