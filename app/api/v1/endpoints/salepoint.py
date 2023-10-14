@@ -30,3 +30,9 @@ async def get_sale_point_multi(skip: int, limit: int, db: AsyncSession = Depends
 @router.post("/filters")
 async def get_sale_point_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -> list[SalepointShow]:
     return await service.get_by_filters(filters, db)
+
+
+@router.post('/distance')
+async def calculate_distance(coords: List[float]):
+    results = await service.calculate_distance_and_order(coords)
+    return results

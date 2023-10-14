@@ -29,25 +29,33 @@ async_session_maker = sessionmaker(
     autocommit=False, autoflush=False, bind=engine_test, class_=AsyncSession, expire_on_commit=False,
 )
 
+from sqlalchemy import text
 
-async def load_data_from_json_file(json_file_path):
-    with open(json_file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-        for entry in data:
-            entry['debit_card'] = bool(random.getrandbits(1))
-            entry['credit_card'] = bool(random.getrandbits(1))
-            entry['consultation'] = bool(random.getrandbits(1))
-            entry['issuing'] = bool(random.getrandbits(1))
-            async with async_session_maker() as session:
-                db_obj = Offices(**entry)  # type: ignore
-                session.add(db_obj)
-                await session.commit()
-                await session.refresh(db_obj)
+
+async def calculate_distance_and_order(coords):
+    sql_query = text(f"""
+        SELECT
+    *,
+    point{tuple(coords)} <@> point(longitude, latitude) AS distance_to_you
+FROM
+    offices
+ORDER BY
+    distance_to_you
+LIMIT 15;
+
+    """)
+    async with async_session_maker() as session:
+        result = await session.execute(sql_query)
+
+    return result.mappings().all()
+
+
+# Usage example
 
 
 if __name__ == "__main__":
     # Run the asyncio event loop to execute the main function
-    asyncio.run(load_data_from_json_file('offices.txt'))
+    asyncio.run(calculate_distance_and_order((37.537434, 55.749634)))
 
 
 async def get_sale_point(id, db: AsyncSession = Depends(get_db)) -> SalepointShow:

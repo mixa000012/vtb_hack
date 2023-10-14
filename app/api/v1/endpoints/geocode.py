@@ -9,7 +9,7 @@ from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-
+from openrouteservice.exceptions import ApiError
 from app.core.deps import get_db
 from app.atms import service
 from app.atms.schema import AtmShow, Filters
@@ -20,10 +20,16 @@ router = APIRouter()
 
 @router.post('/')
 async def get_route(coords: List[List[float]]):
-    return await get_route_from_coords(coords)
+    try:
+        await get_route_from_coords(coords)
+    except ApiError:
+        raise HTTPException(404, detail='Api error')
+    return
 
 
 @router.get('/suggest')
 async def suggest_address(query: str) -> list[str] | None:
     results = await suggest(query)
     return results
+
+
