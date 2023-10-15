@@ -9,6 +9,7 @@ from app.atms.schema import ATMCreateSchema
 import asyncio
 from app.atms.model import ATM
 from app.salepoint.model import Offices
+from app.core import store
 
 engine_test = create_async_engine(
     settings.PG_DATABASE_URI,
@@ -25,6 +26,10 @@ async_session_maker = sessionmaker(
 async def load_data_from_json_file(json_file_path):
     with open(json_file_path, 'r', encoding='utf-8') as file:
         data = json.load(file).get('atms')
+        async with async_session_maker() as session:
+            results = await store.atm.get_multi(db=session, skip=0, limit=10)
+        if results.all():
+            return
         for json_data in data:
             obi_in = ATMCreateSchema(
                 address=json_data.get('address', ''),
@@ -54,6 +59,10 @@ async def load_data_from_json_file(json_file_path):
 
 
 async def load_data_from_json_file_offices(json_file_path):
+    async with async_session_maker() as session:
+        results = await store.sale_point.get_multi(db=session, skip=0, limit=10)
+    if results.all():
+        return
     with open(json_file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
         for entry in data:
@@ -75,6 +84,7 @@ if __name__ == "__main__":
             load_data_from_json_file_offices('offices.txt'),
             load_data_from_json_file('atms.txt')
         )
+
 
     # Run the asyncio event loop to execute the main function
     asyncio.run(run_load_data())

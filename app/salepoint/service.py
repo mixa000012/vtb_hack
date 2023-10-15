@@ -18,16 +18,7 @@ from app.core.deps import get_db
 import asyncio
 from app.salepoint.model import Offices
 
-engine_test = create_async_engine(
-    settings.PG_DATABASE_URI,
-    pool_size=settings.PG_POOL_MAX_SIZE,
-    pool_recycle=settings.PG_POOL_RECYCLE,
-    max_overflow=settings.PG_MAX_OVERFLOW,
-    pool_pre_ping=True,
-)
-async_session_maker = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine_test, class_=AsyncSession, expire_on_commit=False,
-)
+
 
 
 class OfficeDoesntExist(Exception):
@@ -37,7 +28,7 @@ class OfficeDoesntExist(Exception):
 from sqlalchemy import text
 
 
-async def calculate_distance_and_order(coords):
+async def calculate_distance_and_order(coords,db: AsyncSession):
     sql_query = text(f"""
         SELECT
     *,
@@ -49,8 +40,8 @@ ORDER BY
 LIMIT 15;
 
     """)
-    async with async_session_maker() as session:
-        result = await session.execute(sql_query)
+
+    result = await db.execute(sql_query)
     return result.mappings().all()
 
 

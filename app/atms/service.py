@@ -67,7 +67,7 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
     return atms
 
 
-async def calculate_distance_and_order(coords):
+async def calculate_distance_and_order(coords, db: AsyncSession):
     sql_query = text(f"""
         SELECT
     *,
@@ -79,7 +79,6 @@ ORDER BY
 LIMIT 15;
 
     """)
-    async with async_session_maker() as session:
-        result = await session.execute(sql_query)
+    result = await db.execute(sql_query)
 
     return result.mappings().all()

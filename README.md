@@ -17,7 +17,7 @@ psql -U <username> -d <database_name>
 
 -- Enable extensions
 CREATE EXTENSION IF NOT EXISTS cube;
-CREATE EXTENSION IF NOT EXISTS earthdistanc
+CREATE EXTENSION IF NOT EXISTS earthdistance
 ```
 
 ## Used technology

@@ -42,6 +42,7 @@ async def get_sale_point_by_filters(filters: Filters, db: AsyncSession = Depends
 
 
 @router.post('/distance')
-async def find_closest_offices(coords: List[float]) -> List[SalepointShowWithDistance]:
-    results = await service.calculate_distance_and_order(coords)
+async def find_closest_offices(coords: List[float], db: AsyncSession = Depends(get_db)) -> List[
+    SalepointShowWithDistance]:
+    results = await service.calculate_distance_and_order(coords, db)
     return results
