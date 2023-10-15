@@ -1,11 +1,15 @@
-from enum import Enum
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy import DateTime
 import uuid
-from sqlalchemy import String, ARRAY, Integer, Boolean
+from enum import Enum
+
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from app.core.db.base_class import Base
 
 
@@ -13,9 +17,6 @@ class PortalRole(str, Enum):
     ROLE_PORTAL_USER = "ROLE_PORTAL_USER"
     ROLE_PORTAL_ADMIN = "ROLE_PORTAL_ADMIN"
     ROLE_PORTAL_SUPERADMIN = "ROLE_PORTAL_SUPERADMIN"
-
-
-
 
 
 class User(Base):
@@ -26,8 +27,9 @@ class User(Base):
     password = Column(String, nullable=False)
     wheelchair = Column(Boolean)
     blind = Column(Boolean)
-    admin_role_id = Column(UUID(as_uuid=True), ForeignKey('roles.id'))
-    admin_role = relationship("Roles", backref="User", lazy='noload')
+    admin_role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id"))
+    admin_role = relationship("Roles", backref="User", lazy="noload")
+
     @property
     def is_admin(self) -> bool:
         return self.admin_role.role == PortalRole.ROLE_PORTAL_ADMIN

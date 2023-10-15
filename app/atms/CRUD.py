@@ -1,10 +1,12 @@
-from sqlalchemy import select, and_
+from sqlalchemy import and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from app.core.db.CRUD import ModelAccessor, CreateSchemaType, ModelType
 from app.atms.model import ATM
 from app.atms.schema import ATMCreateSchema
+from app.core.db.CRUD import CreateSchemaType
+from app.core.db.CRUD import ModelAccessor
+from app.core.db.CRUD import ModelType
 
 
 class AtmAccessor(ModelAccessor[ATM, ATMCreateSchema, ATMCreateSchema]):
@@ -14,7 +16,6 @@ class AtmAccessor(ModelAccessor[ATM, ATMCreateSchema, ATMCreateSchema]):
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
-
 
     async def get_by_filters(self, db: AsyncSession, conditions, offset, limit):
         query = select(ATM).where(and_(*conditions)).offset(offset).limit(limit)

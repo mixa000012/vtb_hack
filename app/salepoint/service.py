@@ -1,24 +1,14 @@
 import asyncio
-import random
 from typing import List
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
-from app.core.deps import get_db
-from app.core import store
-from app.user.model import User
-import json
-from app.salepoint.schema import SalepointShow, Filters
-from app.core.config import settings
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core import store
 from app.core.deps import get_db
-import asyncio
 from app.salepoint.model import Offices
-
-
+from app.salepoint.schema import Filters
+from app.salepoint.schema import SalepointShow
 
 
 class OfficeDoesntExist(Exception):
@@ -28,8 +18,9 @@ class OfficeDoesntExist(Exception):
 from sqlalchemy import text
 
 
-async def calculate_distance_and_order(coords,db: AsyncSession):
-    sql_query = text(f"""
+async def calculate_distance_and_order(coords, db: AsyncSession):
+    sql_query = text(
+        f"""
         SELECT
     *,
     point{tuple(coords)} <@> point(longitude, latitude) AS distance_to_you
@@ -39,7 +30,8 @@ ORDER BY
     distance_to_you
 LIMIT 15;
 
-    """)
+    """
+    )
 
     result = await db.execute(sql_query)
     return result.mappings().all()
@@ -60,14 +52,18 @@ async def get_sale_point(id, db: AsyncSession = Depends(get_db)) -> SalepointSho
     return sale_point
 
 
-async def get_multi_sale_point(skip, limit, db: AsyncSession = Depends(get_db)) -> List[SalepointShow]:
+async def get_multi_sale_point(
+    skip, limit, db: AsyncSession = Depends(get_db)
+) -> List[SalepointShow]:
     res = await store.sale_point.get_multi(skip=skip, limit=limit, db=db)
     if not res:
         raise OfficeDoesntExist
     return res.all()
 
 
-async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -> list[SalepointShow]:
+async def get_by_filters(
+    filters: Filters, db: AsyncSession = Depends(get_db)
+) -> list[SalepointShow]:
     conditions = []
     if filters.credit_card:
         conditions.append(Offices.credit_card == True)
@@ -78,10 +74,13 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
     if filters.issuing:
         conditions.append(Offices.issuing == True)
     if conditions:
-        offices = await store.sale_point.get_by_filters(db=db, conditions=conditions, offset=filters.offset,
-                                                        limit=filters.limit)
+        offices = await store.sale_point.get_by_filters(
+            db=db, conditions=conditions, offset=filters.offset, limit=filters.limit
+        )
     else:
-        offices = await store.sale_point.get_multi(skip=filters.offset, limit=filters.limit, db=db)
+        offices = await store.sale_point.get_multi(
+            skip=filters.offset, limit=filters.limit, db=db
+        )
         offices = offices.all()
     if not offices:
         raise OfficeDoesntExist

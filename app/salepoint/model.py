@@ -1,14 +1,18 @@
-from sqlalchemy import Column, ForeignKey, func
-from sqlalchemy import DateTime
 import uuid
-from sqlalchemy import String, Boolean, Integer, JSON, Float
+
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import Float
+from sqlalchemy import Integer
+from sqlalchemy import JSON
+from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+
 from app.core.db.base_class import Base
 
 
 class Offices(Base):
-    __tablename__ = 'offices'
+    __tablename__ = "offices"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     salePointName = Column(String)

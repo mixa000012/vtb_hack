@@ -1,8 +1,9 @@
-from enum import Enum
-import uuid
-from fastapi import HTTPException
 import re
+import uuid
+from enum import Enum
 from typing import Any
+
+from fastapi import HTTPException
 from pydantic import validator
 from pydantic.main import BaseModel
 

@@ -1,8 +1,10 @@
-from sqlalchemy import select, and_
+from sqlalchemy import and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from app.core.db.CRUD import ModelAccessor, CreateSchemaType, ModelType
+from app.core.db.CRUD import CreateSchemaType
+from app.core.db.CRUD import ModelAccessor
+from app.core.db.CRUD import ModelType
 from app.salepoint.model import Offices
 from app.salepoint.schema import SalePointCreate
 

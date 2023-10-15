@@ -1,22 +1,24 @@
-import asyncio
 import logging
+
 import uvicorn
 from fastapi import FastAPI
-from starlette.middleware import Middleware
-from starlette_context.middleware import RawContextMiddleware
-from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 from sqlalchemy import text
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+from starlette_context.middleware import RawContextMiddleware
+from tenacity import after_log
+from tenacity import before_log
+from tenacity import retry
+from tenacity import stop_after_attempt
+from tenacity import wait_fixed
+
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.db.session import AsyncSessionLocal
 from app.core.logs.log import setup_logging
-from app.core.middlewares import (
-    ContextMiddleware,
-    ExceptionMiddleware,
-    LogMiddleware,
-)
-from starlette.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from app.core.middlewares import ContextMiddleware
+from app.core.middlewares import ExceptionMiddleware
+from app.core.middlewares import LogMiddleware
 
 middleware = [
     Middleware(RawContextMiddleware),

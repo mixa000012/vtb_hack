@@ -1,4 +1,3 @@
-from datetime import datetime
 import uuid
 from typing import List
 
@@ -35,7 +34,6 @@ class SalePointCreate(BaseModel):
 
 
 class SalepointShow(SalePointCreate):
-
     class Config:
         orm_mode = True
 

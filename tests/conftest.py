@@ -1,26 +1,27 @@
-from typing import Generator, Any
+import asyncio
+from datetime import timedelta
+from typing import AsyncGenerator
 from uuid import uuid4
 
-import asyncpg
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import delete, insert
-from typing import AsyncGenerator
+from sqlalchemy import delete
+from sqlalchemy import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
 
+from app.core import store
+from app.core.config import settings
+from app.core.db.base import Base
+from app.core.deps import get_db
+from app.main import app
+from app.user.model import PortalRole
+from app.user.model import Roles
+from app.user.model import User
 from app.user.schema import UserCreate
 from utils.hashing import Hasher
 from utils.security import create_access_token
-from datetime import timedelta
-from app.core.db.base import Base
-from app.core.config import settings
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.deps import get_db
-from app.main import app
-from app.user.model import User, Roles, PortalRole
-import asyncio
-from app.core import store
 
 engine_test = create_async_engine(
     settings.PG_DATABASE_URI,
@@ -30,7 +31,11 @@ engine_test = create_async_engine(
     pool_pre_ping=True,
 )
 async_session_maker = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine_test, class_=AsyncSession, expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+    bind=engine_test,
+    class_=AsyncSession,
+    expire_on_commit=False,
 )
 
 
@@ -45,7 +50,11 @@ async def _get_test_db():
             pool_pre_ping=True,
         )
         async_session_maker = sessionmaker(
-            autocommit=False, autoflush=False, bind=engine_test, class_=AsyncSession, expire_on_commit=False,
+            autocommit=False,
+            autoflush=False,
+            bind=engine_test,
+            class_=AsyncSession,
+            expire_on_commit=False,
         )
 
         yield async_session_maker()
@@ -56,7 +65,7 @@ async def _get_test_db():
 app.dependency_overrides[get_db] = _get_test_db
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
@@ -64,7 +73,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -107,11 +116,13 @@ async def create_user_in_database():
             user = await store.user.create(
                 session,
                 obj_in=UserCreate(
-                    email=user_data.get('email'),
-                    password=Hasher.get_hashed_password(user_data.get('password')),
-                    admin_role=role
-                ))
+                    email=user_data.get("email"),
+                    password=Hasher.get_hashed_password(user_data.get("password")),
+                    admin_role=role,
+                ),
+            )
             return user
+
     return create_user_in_database
 
 

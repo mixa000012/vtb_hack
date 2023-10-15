@@ -1,7 +1,6 @@
-from datetime import datetime
 import uuid
-from typing import List
 from typing import Optional
+
 from pydantic.main import BaseModel
 
 
@@ -22,6 +21,7 @@ class ATMCreateSchema(BaseModel):
 
 class AtmShow(ATMCreateSchema):
     id: uuid.UUID
+
     class Config:
         orm_mode = True
 

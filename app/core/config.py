@@ -1,7 +1,10 @@
 import secrets
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
-from pydantic import BaseSettings, PostgresDsn, validator
+from pydantic import BaseSettings
+from pydantic import PostgresDsn
+from pydantic import validator
 
 
 class Settings(BaseSettings):
@@ -26,6 +29,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
+
     @validator("PG_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: str | None, values: Dict[str, Any]) -> Any:
         print(values)

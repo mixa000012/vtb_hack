@@ -7,10 +7,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette import status
-from utils.hashing import Hasher
+
+from app.core.config import settings
 from app.core.deps import get_db
 from app.user.model import User
-from app.core.config import settings
+from utils.hashing import Hasher
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/user/token")
 
 
@@ -25,12 +27,14 @@ async def get_current_user_from_token(
         payload = jwt.decode(
             token, settings.SECRET_KEY_, algorithms=[settings.ALGORITHM]
         )
-        id = (payload.get("sub"))
+        id = payload.get("sub")
         if id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await db.execute(select(User).options(selectinload(User.admin_role)).where(User.user_id == id))
+    user = await db.execute(
+        select(User).options(selectinload(User.admin_role)).where(User.user_id == id)
+    )
     user = user.scalar()
     if user is None:
         raise credentials_exception
