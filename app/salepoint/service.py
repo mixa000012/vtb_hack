@@ -30,7 +30,6 @@ async_session_maker = sessionmaker(
 )
 
 
-# todo для бановатов find closest
 class OfficeDoesntExist(Exception):
     pass
 
@@ -83,11 +82,15 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
         conditions.append(Offices.credit_card == True)
     if filters.debit_card:
         conditions.append(Offices.debit_card == True)
+    if filters.consultation:
+        conditions.append(Offices.consultation == True)
+    if filters.issuing:
+        conditions.append(Offices.issuing == True)
     if conditions:
         offices = await store.sale_point.get_by_filters(db=db, conditions=conditions, offset=filters.offset,
                                                         limit=filters.limit)
     else:
-        offices = await store.sale_point.get_multi(skip=filters.offset, limit=filters.limit)
+        offices = await store.sale_point.get_multi(skip=filters.offset, limit=filters.limit, db=db)
         offices = offices.all()
     if not offices:
         raise OfficeDoesntExist
