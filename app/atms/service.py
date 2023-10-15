@@ -62,7 +62,7 @@ async def get_by_filters(filters: Filters, db: AsyncSession = Depends(get_db)) -
         atms = await store.atm.get_by_filters(db=db, conditions=conditions, offset=filters.offset,
                                               limit=filters.limit)
     else:
-        atms = await store.atm.get_multi(skip=filters.offset, limit=filters.limit)
+        atms = await store.atm.get_multi(skip=filters.offset, limit=filters.limit, db=db)
         atms = atms.all()
     return atms
 
