@@ -12,8 +12,12 @@ Cube and EarthDistance extensions must be enabled in postgreSQL BD, so log in da
 extensions:
 
 ```   
-create extension cube;
-create extension earthdistance;
+-- Log in to PostgreSQL database using psql
+psql -U <username> -d <database_name>
+
+-- Enable extensions
+CREATE EXTENSION IF NOT EXISTS cube;
+CREATE EXTENSION IF NOT EXISTS earthdistanc
 ```
 
 ## Used technology

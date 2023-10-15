@@ -19,7 +19,7 @@ services:
     env_file:
       - etc/config.env
     container_name: vtb_app
-    command: [ "/fastapi_app/docker/app.sh" ]
+    command: [ "/fastapi_app/docker/app.sh"]
     ports:
       - 8000:8000
     depends_on:
