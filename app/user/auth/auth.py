@@ -10,6 +10,8 @@ from starlette import status
 
 from app.core.config import settings
 from app.core.deps import get_db
+from app.user.jwt.base.token_types import TokenType
+from app.user.jwt.utils import check_revoked
 from app.user.model import User
 from utils.hashing import Hasher
 
@@ -17,7 +19,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/user/token")
 
 
 async def get_current_user_from_token(
-    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+        token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -27,6 +29,10 @@ async def get_current_user_from_token(
         payload = jwt.decode(
             token, settings.SECRET_KEY_, algorithms=[settings.ALGORITHM]
         )
+        if payload['type'] != TokenType.ACCESS.value:
+            raise HTTPException(detail='This is not access token!', status_code=403)
+        if await check_revoked(payload['jti'], db):
+            raise HTTPException(detail='This token is revoked!', status_code=403)
         id = payload.get("sub")
         if id is None:
             raise credentials_exception

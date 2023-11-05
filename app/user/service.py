@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import store
 from app.core.config import settings
 from app.core.deps import get_db
-from app.user.auth import auth_user
-from app.user.auth import get_current_user_from_token
+from app.user.auth.auth import auth_user
+from app.user.auth.auth import get_current_user_from_token
 from app.user.model import User
 from app.user.schema import User_
 from app.user.schema import UserBase
@@ -20,7 +20,7 @@ from app.user.schema import UserCreate
 from app.user.schema import UserShow
 from app.user.schema import UserUpdateData
 from utils.hashing import Hasher
-from utils.security import create_access_token
+# from utils.security import create_access_token
 
 
 class UserDoesntExist(Exception):
@@ -38,7 +38,7 @@ class PortalRole(str, Enum):
 
 
 async def login_for_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
+        form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ) -> str:
     user = await auth_user(form_data.username, form_data.password, db)
     if not user:
@@ -49,6 +49,24 @@ async def login_for_token(
         expires_delta=access_token_expires,
     )
     return access_token
+
+async def register(obj: UserBase, db: AsyncSession = Depends(get_db)) -> UserShow:
+    user = await store.user.get_by_email(obj.email, db)
+    if user:
+        raise UserAlreadyExist
+    role = await store.user.get_role(db, PortalRole.ROLE_PORTAL_USER)
+    user = await store.user.create(
+        db,
+        obj_in=UserCreate(
+            email=obj.email,
+            password=Hasher.get_hashed_password(obj.password),
+            admin_role=role,
+        ),
+    )
+
+    access_token, refresh_token = await self._issue_tokens_for_user(user=user)
+
+    return TokensDTO(access_token=access_token, refresh_token=refresh_token), None
 
 
 async def create_user(obj: UserBase, db: AsyncSession = Depends(get_db)) -> UserShow:
@@ -68,9 +86,9 @@ async def create_user(obj: UserBase, db: AsyncSession = Depends(get_db)) -> User
 
 
 async def update_user(
-    current_user: User = Depends(get_current_user_from_token),
-    update_data: UserUpdateData = Body(...),
-    db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
+        update_data: UserUpdateData = Body(...),
+        db: AsyncSession = Depends(get_db),
 ) -> User_:
     updated_user = await store.user.update(
         db=db,
@@ -100,16 +118,16 @@ def check_user_permissions(target_user: User, current_user: User) -> bool:
 
 
 async def delete_user(
-    user_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user_from_token),
+        user_id: UUID,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
 ) -> UserShow:
     user_for_deletion = await store.user.get(db, user_id)
     if user_for_deletion is None:
         raise UserDoesntExist
     if not check_user_permissions(
-        target_user=user_for_deletion,
-        current_user=current_user,
+            target_user=user_for_deletion,
+            current_user=current_user,
     ):
         raise HTTPException(status_code=403, detail="forbidden.")
     deleted_user_id = await store.user.remove(db=db, id=user_id)
@@ -121,9 +139,9 @@ async def delete_user(
 
 
 async def grant_admin_privilege(
-    nickname: str,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user_from_token),
+        nickname: str,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
 ) -> UserShow:
     if not current_user.is_superadmin:
         raise HTTPException(status_code=403, detail="Forbidden.")
@@ -147,9 +165,9 @@ async def grant_admin_privilege(
 
 
 async def revoke_admin_privilege(
-    email: str,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user_from_token),
+        email: str,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
 ):
     if not current_user.is_superadmin:
         raise HTTPException(status_code=403, detail="Forbidden.")
@@ -179,7 +197,7 @@ async def revoke_admin_privilege(
 
 
 async def get_user(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user_from_token),
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token),
 ):
     return await store.user.get(db, current_user.user_id)

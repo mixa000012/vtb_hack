@@ -28,6 +28,7 @@ class User(Base):
     wheelchair = Column(Boolean)
     blind = Column(Boolean)
     admin_role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id"))
+    tokens = relationship("IssuedJWTToken", backref="User", lazy="noload")
     admin_role = relationship("Roles", backref="User", lazy="noload")
 
     @property
@@ -51,3 +52,5 @@ class Roles(Base):
     def remove_admin_privileges_from_model(self):
         if self.is_admin:
             return {role for role in self.roles if role != PortalRole.ROLE_PORTAL_ADMIN}
+
+
