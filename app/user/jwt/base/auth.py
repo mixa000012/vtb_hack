@@ -57,7 +57,7 @@ class JWTAuth:
         return str(uuid.uuid4())
 
     def verify_token(self, token) -> dict[str, Any]:
-        return jwt.decode(token, self._config.secret, algorithms=[self._config.algorithm])
+        return jwt.decode(token, self._config.SECRET_KEY_, algorithms=[self._config.ALGORITHM])
 
     def get_jti(self, token) -> str:
         return self.verify_token(token)['jti']

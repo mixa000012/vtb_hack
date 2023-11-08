@@ -47,6 +47,15 @@ async def get_current_user_from_token(
     return user
 
 
+async def get_device_id_from_token(
+        token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+):
+    payload = jwt.decode(
+        token, settings.SECRET_KEY_, algorithms=[settings.ALGORITHM]
+    )
+    device_id = payload.get("device_id")
+    return device_id
+
 async def auth_user(nickname: str, password: str, db: AsyncSession) -> None | User:
     user = await db.execute(select(User).where(User.email == nickname))
     user = user.scalar()
